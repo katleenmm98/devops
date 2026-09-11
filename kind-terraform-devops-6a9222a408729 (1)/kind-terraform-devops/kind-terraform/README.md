@@ -116,3 +116,6 @@ A imagem em `/evidencias` mostra, em uma única captura de tela:
 - Saída de `kubectl get nodes -o wide`, confirmando 1 node `devops-control-plane`
   com role `control-plane` e 2 nodes (`devops-worker`, `devops-worker2`) com role
   `worker`, todos com status `Ready`.
+
+
+oioioioi
