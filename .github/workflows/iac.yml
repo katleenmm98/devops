@@ -2,12 +2,12 @@ name: CI Pipeline
 on:
   push:
     branches:
-      [main]
+      [ main ]
     paths:
       -'terraform/**'
   pull_request:
     branches:
-      [hostname]
+      [ hostname ]
     paths:
       -'terraform/**'
   workflow_dispatch:
