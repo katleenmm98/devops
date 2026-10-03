@@ -117,5 +117,3 @@ A imagem em `/evidencias` mostra, em uma única captura de tela:
   com role `control-plane` e 2 nodes (`devops-worker`, `devops-worker2`) com role
   `worker`, todos com status `Ready`.
 
-
-oioioioi
