@@ -3,13 +3,37 @@ on:
   push:
     branches:
       [main]
+    paths:
+      -'terraform/**'
   pull_request:
     branches:
       [hostname]
+    paths:
+      -'terraform/**'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./terraform
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: hostname
-        run: echo "${{github.head_ref||github.ref_name}}"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+      
+      - name: Terraform Init
+        run: terraform init
+        
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -input=false
