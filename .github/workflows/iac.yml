@@ -53,10 +53,10 @@ jobs:
       - name: Configurar kubectl
         run: kind export kubeconfig --name "$CLUSTER_NAME"
 
-#      - name: Baixar artefato da imagem
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: imagem
+      - name: Baixar artefato da imagem
+        uses: actions/download-artifact@v4
+        with:
+          name: imagem
 
       - name: Carregar imagem no kind
         run: |
