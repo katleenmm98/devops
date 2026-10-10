@@ -1,39 +1,73 @@
-name: CI Pipeline
+name: Build e Deploy no kind
+
 on:
   push:
-    branches:
-      [ main ]
-    #paths:
-    #  -'terraform/**'
-  pull_request:
-    branches:
-      [ hostname ]
-    paths:
-      -'terraform/**'
+    branches: [main]
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: terraform
+env:
+  IMAGE: nginx-aula-11:1.0.0
+  CLUSTER_NAME: aula-11
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  build:
+    name: Build
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
+      - name: Build da imagem no Docker local
+        run: docker build -t "$IMAGE" app
+
+      # Sem registry: a imagem vai para o stage de deploy como artefato
+      - name: Exportar imagem
+        run: docker save "$IMAGE" -o imagem.tar
+
+      - name: Publicar artefato da imagem
+        uses: actions/upload-artifact@v4
+        with:
+          name: imagem
+          path: imagem.tar
+          retention-days: 1
+
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
 
-      - name: Terraform Format
-        run: terraform fmt -check -recursive
-      
-      - name: Terraform Init
-        run: terraform init
-        
-      - name: Terraform Validate
-        run: terraform validate
+      - name: Criar cluster kind com Terraform
+        working-directory: iac
+        run: |
+          terraform init -input=false
+          terraform apply -input=false -auto-approve -var "cluster_name=$CLUSTER_NAME"
 
-      - name: Terraform Plan
-        run: terraform plan -input=false
+      - name: Configurar kubectl
+        run: kind export kubeconfig --name "$CLUSTER_NAME"
+
+      - name: Baixar artefato da imagem
+        uses: actions/download-artifact@v4
+        with:
+          name: imagem
+
+      - name: Carregar imagem no kind
+        run: |
+          docker load -i imagem.tar
+          kind load docker-image "$IMAGE" --name "$CLUSTER_NAME"
+
+      - name: Aplicar manifestos
+        run: kubectl apply -f manifestos/
+
+      - name: Aguardar rollout
+        run: kubectl rollout status deployment/nginx-aula-11 --timeout=120s
+
+      - name: Testar aplicaÃ§Ã£o na porta 81
+        run: curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors http://localhost:81 | head -n 10
