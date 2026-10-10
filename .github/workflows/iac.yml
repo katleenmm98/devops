@@ -60,7 +60,7 @@ jobs:
 
       - name: Carregar imagem no kind
         run: |
-          docker load -i imagem.tar
+          docker load -i /home/usuario/actions-runner/_work/devops/devops/imagem.tar
           kind load docker-image "$IMAGE" --name "$CLUSTER_NAME"
 
       - name: Aplicar manifestos
