@@ -44,11 +44,11 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Criar cluster kind com Terraform
-        working-directory: iac
-        run: |
-          terraform init -input=false
-          terraform apply -input=false -auto-approve -var "cluster_name=$CLUSTER_NAME"
+   #   - name: Criar cluster kind com Terraform
+  #      working-directory: iac
+ #       run: |
+#          terraform init -input=false
+#          terraform apply -input=false -auto-approve -var "cluster_name=$CLUSTER_NAME"
 
       - name: Configurar kubectl
         run: kind export kubeconfig --name "$CLUSTER_NAME"
