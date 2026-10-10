@@ -7,7 +7,7 @@ on:
 
 env:
   IMAGE: nginx-aula-11:1.0.0
-  CLUSTER_NAME: aula-11
+  CLUSTER_NAME: devops
 
 jobs:
   build:
